@@ -1,32 +1,8 @@
-# Projet_Robot
-Hey!
+# One_Wheeled_Gyropode
 
-So my project, yet another robot.. Come on it's fun!
-It is actualy a balancing bot, with two coaxial wheels, engines, sensors and stuff 
-allowing it to stand in a non-stable position, and to move in my room.
+Afer a few accidents with my previous gyropode prototype, I decided to improve my hardware.
+Then it hit me: why not improving it drasticaly? I found some inspiration in the fantasy-world of Borderlands: https://www.2k.com/games/borderlands-2, and the one-wheeled robot they imagined, I want to make it real.
 
-Why?
-Well, it is a bit of a challenge, even if there is allready plenty of nice exemples on Youtube.
-I'll have to make a smart mecanical design for improved command stability and speed
-Programming will be fun too
+I've search a little on the internet (stand 27/01/2017), and I haven't found any similar project. They are some great devices able to stand on one foot using inertia wheels to correct their tilt, but nothing based only on the movement of the unique wheel.
 
-I gess it is a pretty versatile solution for any kind of "maze runer" bot. In the first time it will stand and explore my room,
-then it's gonna recognise the good guys and bring them coffee. Yes you heard me.
-
-Just think about all the possibilities of additionnal functionnalities : mapping, picture processing, AI, calling it Jarvis....
-
-How it will be done?
-I have allready build a prototype (October 2015), powered by Arduino (Uno Rev3), able to move in my room 
-and to now where it is thanks to impuls count in both wheels BUT NOT TO STAND BY HIMSELF
-
-Next version will include acceleration sensor MPU6050 on an I²C bus
-
-I intend to include a RaspberryPi for wireless communication throught http protocol and wifi.
-Best case senario, the RPI will process most of the calculation, allowing multithreading and fancy algorithms
-It should also drive a webcam et rund picture processing algorithm for cross-fire localization and stuff
-
-Comments are welcome, it's my first project of that importance.
-I'm a mecanical engineering student, I have got an interesting point of view, but just one, that's the point.
-
-openCrapal, the Frensh guy.
-
+I have some more work to do to bring the robot to live, I'll try to keep tracks.
