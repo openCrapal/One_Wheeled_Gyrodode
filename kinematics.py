@@ -95,7 +95,7 @@ class Kin4Dof:
         return
 
     def reverse_kin(self, pos):
-        mat_rotation = rotation_matrix('z', pos[2]) @ rotation_matrix('y', pos[1]) @ rotation_matrix('x', pos[0])
+        mat_rotation = rotation_matrix('z', pos[2]).dot(rotation_matrix('y', pos[1])).dot(rotation_matrix('x', pos[0]))
         sing_detection = False
         # The analitic way. Newton_krylow optimation did work but was unstable.
         # https://fr.wikipedia.org/wiki/Système_bielle-manivelle
