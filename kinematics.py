@@ -1,15 +1,10 @@
 #!/usr/bin/python3
 # -*-coding:utf-8 -*-
 
-#import numpy as np
-#from scipy.optimize import newton_krylov
-#from numpy import cosh, zeros_like, mgrid, zeros
-
-
 from time import time, sleep
 import numpy as np
 from scipy.optimize import newton_krylov
-from numpy import cos, sin, sqrt, tan, arcsin, radians
+from numpy import cos, sin, sqrt, tan, arcsin, radians, pi
 
 # Front direction is +y
 # left is +x top is +z
@@ -17,8 +12,8 @@ from numpy import cos, sin, sqrt, tan, arcsin, radians
 
 # parameters, metric system
 servo_center = [0.04, 0.03, -0.02]
-ball_joint_wheel = [0.05, 0.005, -0.127]
-rod_length = 0.8
+ball_joint_wheel = [0.05, 0.005, -0.072]
+rod_length = 0.08
 hub_length = 0.035
 
 wheel_position = [0, 0, 0, 0] # a, b, c, Z
@@ -85,7 +80,7 @@ class Kin4Dof:
                 tr_joints = np.array(joints[i])
                 tr_joints[2] += x[3]
                 # rotations
-                pos = np.matmul(rotation_matrix('z', x[2])@rotation_matrix('y', x[1])@rotation_matrix('x', x[0]), tr_joints)
+                pos = np.matmul(rotation_matrix('z', x[2]).dot(rotation_matrix('y', x[1])).dot(rotation_matrix('x', x[0])), tr_joints)
                 #print(pos)
                 # Difference between the actual lengths of the rods and the estimated ones (squared)
                 ecarts[i] = (pos[0, 0] - servos_end[i][0, 0]) ** 2 + (pos[0, 1] - servos_end[i][0, 1])**2 + (pos[0, 2] - servos_end[i][0, 2])**2
@@ -132,31 +127,30 @@ class Kin4Dof:
         servo_end = []
         for i in range(0, 3):
             servo_end.append(self.servos[0][i]+self.hub_servos[0][i])
+
         dx = servo_end[0] - self.joints[0][0]
         dy = servo_end[1] - self.joints[0][1]
-
         dz = sqrt(self.rod_length ** 2 - dx ** 2 - dy ** 2)
-        print("Neutral value for z_joint: " , servo_end[2] - dz)
+
+        print("Neutral value for z_joint: ", servo_end[2] - dz)
         for k in range(0, 4):
             self.joints[k][2] = servo_end[2] - dz
         return self.joints[0][2]
 
     def search_borders(self):
-        border = []
-        param=[0,0,0,0]
+        borders = [[]]
         for i in limits[0]:
             for j in limits[1]:
                 for k in limits[2]:
                     for l in limits[3]:
                         param = [i, j, k, l]
-                        if myKin.reverse_kin(param):
+                        if self.reverse_kin(param):
                             print(param)
-
+                            borders[0].append(param)
 
     def jacobian(self, x):  #dQ/dX
         jac = np.zeros([4, 4])
         dx = 0.00005
-        x0 = x
         for i in range(0, 4):
             x0 = x
             x0[i] += dx
@@ -170,16 +164,44 @@ class Kin4Dof:
         return jac
 
 
+class Gyropode:
+    def __init__(self, kin4dof,  delta_z_wheel, radius_wheel, radius_tire=0.02, z_middle_point=0.0):
+        self.Kin = kin4dof
+        self.m_point = np.array([0.0, 0.0, z_middle_point])
+        self.z_w = delta_z_wheel + self.Kin.joints[0][2]
+        self.axe_wheel = np.array([0.0, 0.0, self.z_w])
+        self.r1 = radius_wheel
+        self.r2 = radius_tire
+
+        self.heading = [0.0, 0.0, 0.0]  # [tilt, roll , heading] Absolute
+
+    def reverse_kin(self, contact_point):
+        x_roue = [0,0,0,0]
+        x_roue[0] = arcsin(contact_point[0] / (self.z_w + self.r1))
+        x_roue[1] = arcsin(contact_point[1] / (self.z_w + self.r1))
+        x_roue[2] = contact_point[3]
+        x_roue[3] = self.z_w
+        sing = self.Kin.reverse_kin(x_roue)
+        return sing
 
 
-t0 = time()
-myKin = Kin4Dof(servo_center, ball_joint_wheel, hub_length, rod_length)
-myKin.search_z0()
-myKin.search_borders()
-print("zmax \n", myKin.jacobian([0,0,0,limits[3][0]]))
-print("zmoy \n", myKin.jacobian([0,0,0,limits[3][1]]))
-print("zmin \n", myKin.jacobian([0,0,0,limits[3][2]]))
+if __name__ == "__main__":
+    t0 = time()
+    myKin = Kin4Dof(servo_center, ball_joint_wheel, hub_length, rod_length)
+    myKin.search_z0()
+    #myKin.search_borders()
+    #print("zmax \n", myKin.jacobian([0,0,0,limits[3][0]]))
+    #print("zmoy \n", myKin.jacobian([0,0,0,limits[3][1]]))
+    #print("zmin \n", myKin.jacobian([0,0,0,limits[3][2]]))
 
-myKin.reverse_kin([0, 0, 1.2, 0])
-#print(myKin.Q)
-print("time: ", time()-t0)
+    #myKin.reverse_kin([0, 0, 0, 0])
+
+    #myGyro = Gyropode(myKin, 0.1, 0.05, 0.02)
+    for i in range(0, 200):
+        s = 0.01 * sin(i * pi/100)
+        c = 0.015 * cos(i * pi / 100)
+        myKin.reverse_kin([s, c, 0, -0.01])
+        print([s, c, 0, -0.01], myKin.Q)
+    print("time: ", time()-t0)
+
+
