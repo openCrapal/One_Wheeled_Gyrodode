@@ -197,11 +197,11 @@ if __name__ == "__main__":
     #myKin.reverse_kin([0, 0, 0, 0])
 
     #myGyro = Gyropode(myKin, 0.1, 0.05, 0.02)
-    for i in range(0, 200):
+    for i in range(0, 1000):
         s = 0.01 * sin(i * pi/100)
         c = 0.015 * cos(i * pi / 100)
         myKin.reverse_kin([s, c, 0, -0.01])
-        print([s, c, 0, -0.01], myKin.Q)
+        #print([s, c, 0, -0.01], myKin.Q)
     print("time: ", time()-t0)
 
 
